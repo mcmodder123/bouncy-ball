@@ -4,10 +4,21 @@
 #include <string.h>
 #include <unistd.h>
 
-// some constants
-const float PIOVER180 = 0.01745329251;
-const int STARTING_VELOCITY_X = 1;
-const int STARTING_VELOCITY_Y = 1;
+// written by mc_modder
+/*
+ * if anyone actually sees this, i would
+ * like some tips on memory allocation
+ * and that sort of stuff
+ */
+
+// added custom x and y velocity parameters
+// removed unnecessary conversion functions
+// added cool π symbol (only here though)
+
+// no longer constants as they can
+// be changable by command line
+int push_x = 2;
+int push_y = 1;
 float gravity = 0.25f;
 float yaxisdamp = 0.95;
 float xaxisdamp = 0.95;
@@ -20,7 +31,7 @@ typedef struct {
   float velocityY;
 } Ball;
 
-// draw the ball at a given location
+// draws the ball at a given location
 void drawBall(Ball ball) {
   mvprintw(ball.y + 1, ball.x - 1, "*");
   mvprintw(ball.y + 1, ball.x, "*");
@@ -32,10 +43,6 @@ void drawBall(Ball ball) {
   mvprintw(ball.y - 1, ball.x, "*");
   mvprintw(ball.y - 1, ball.x + 1, "*");
 }
-
-// simple conversions
-float toRadians(float degrees) { return degrees * PIOVER180; }
-float toDegrees(float radians) { return radians / PIOVER180; }
 
 // calculate angle based on x and y velocity
 float calculateAngle(Ball ball) {
@@ -104,6 +111,8 @@ void printHelp() {
   printf("    -xd <num>: --x-damping <num: sets custom x axis damping "
          "amount\n");
   printf("    -g <num>: --gravity <num>: sets custom gravity force\n");
+  printf("    -px <num>: --push-x <num>: sets custom x velocity\n");
+  printf("    -py <num>: --push-y <num>: sets custom y velocity\n");
   printf("  * note: it is recommended to use -ng and -nyd together\n");
 }
 
@@ -131,7 +140,15 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[i], "-xd") == 0 ||
                strcmp(argv[i], "--x-damping") == 0) {
       xaxisdamp = strtol(argv[i + 1], NULL, 10);
-    } else if (argc == 1 || strcmp(argv[i], argv[0]) == 0) {
+    } else if (strcmp(argv[i], "-px") == 0 ||
+               strcmp(argv[i], "--push-x") == 0) {
+      push_x = strtol(argv[i + 1], NULL, 10);
+    } else if (strcmp(argv[i], "-py") == 0 ||
+               strcmp(argv[i], "--push-y") == 0) {
+      push_y = strtol(argv[i + 1], NULL, 10);
+    }
+
+    else if (argc == 1 || strcmp(argv[i], argv[0]) == 0) {
       continue;
     }
   }
@@ -149,8 +166,8 @@ int main(int argc, char *argv[]) {
   Ball ball;
   ball.x = 10;
   ball.y = 10;
-  ball.velocityX = STARTING_VELOCITY_X;
-  ball.velocityY = STARTING_VELOCITY_Y;
+  ball.velocityX = push_x;
+  ball.velocityY = push_y;
   // main loop
   while (1) {
     clear();
